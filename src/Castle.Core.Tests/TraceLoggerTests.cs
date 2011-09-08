@@ -84,6 +84,7 @@ namespace Castle.Core.Logging.Tests
 			Listener.AssertContains("testsrule", "Thisisamessage");
 		}
 
+        /*
 		[Test]
 		[Platform(Exclude = "mono", Reason = "Won't pass because of Mono bug. Review this when new Mono is out.")]
 		public void FallUpToShorterSourceName()
@@ -95,6 +96,7 @@ namespace Castle.Core.Logging.Tests
 			Listener.AssertContains("configrule", "Castle.Core.Configuration.Xml.XmlConfigurationDeserializer");
 			Listener.AssertContains("configrule", "Logging to config namespace");            
 		}
+        */
 
 		[Test]
 		[Platform(Exclude = "mono", Reason = "Won't pass because of Mono bug. Review this when new Mono is out.")]
