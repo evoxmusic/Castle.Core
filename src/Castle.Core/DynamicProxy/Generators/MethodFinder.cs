@@ -24,7 +24,7 @@ namespace Castle.DynamicProxy.Generators
 	/// </summary>
 	public class MethodFinder
 	{
-		private static readonly Dictionary<Type, object> cachedMethodInfosByType = new Dictionary<Type, object>();
+        private static readonly Dictionary<Type, MethodInfo[]> cachedMethodInfosByType = new Dictionary<Type, MethodInfo[]>();
 		private static readonly object lockObject = new object();
 
 		public static MethodInfo[] GetAllInstanceMethods(Type type, BindingFlags flags)
@@ -38,16 +38,12 @@ namespace Castle.DynamicProxy.Generators
 
 			lock (lockObject)
 			{
-				if (!cachedMethodInfosByType.ContainsKey(type))
+				if (!cachedMethodInfosByType.TryGetValue(type, out methodsInCache))
 				{
 					// We always load all instance methods into the cache, we will filter them later
-					cachedMethodInfosByType.Add(
-						type,
-						RemoveDuplicates(type.GetMethods(
-							BindingFlags.Public | BindingFlags.NonPublic
-							| BindingFlags.Instance)));
+                    methodsInCache = RemoveDuplicates(type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+					cachedMethodInfosByType.Add(type, methodsInCache);
 				}
-				methodsInCache = (MethodInfo[])cachedMethodInfosByType[type];
 			}
 			return MakeFilteredCopy(methodsInCache, flags & (BindingFlags.Public | BindingFlags.NonPublic));
 		}
@@ -76,7 +72,7 @@ namespace Castle.DynamicProxy.Generators
 			return result.ToArray();
 		}
 
-		private static object RemoveDuplicates(MethodInfo[] infos)
+        private static MethodInfo[] RemoveDuplicates(MethodInfo[] infos)
 		{
 			var uniqueInfos = new Dictionary<MethodInfo, object>(MethodSignatureComparer.Instance);
 			foreach (var info in infos)

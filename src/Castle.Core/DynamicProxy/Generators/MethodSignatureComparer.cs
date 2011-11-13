@@ -41,16 +41,11 @@ namespace Castle.DynamicProxy.Generators
 
 				for (var i = 0; i < xArgs.Length; ++i)
 				{
-					if (xArgs[i].IsGenericParameter != yArgs[i].IsGenericParameter)
-					{
-						return false;
-					}
-
-					if (!xArgs[i].IsGenericParameter && xArgs[i].FullName != yArgs[i].FullName)
-					{
-						return false;
-					}
-				}
+                    if (!EqualSignatureTypes(xArgs[i], yArgs[i]))
+                    {
+                        return false;
+                    }
+                }
 			}
 
 			return true;
@@ -93,11 +88,41 @@ namespace Castle.DynamicProxy.Generators
 			}
 			else
 			{
-				if (x.FullName != y.FullName)
+				if (x.Name != y.Name)
 				{
 					return false;
 				}
-			}
+                if (x.Namespace != y.Namespace)
+                {
+                    return false;
+                }
+                if (x.IsGenericType != y.IsGenericType)
+                {
+                    return false;
+                }
+                if (x.IsGenericType)
+                {
+				    var xArgs = x.GetGenericArguments();
+				    var yArgs = y.GetGenericArguments();
+
+				    if (xArgs.Length != yArgs.Length)
+				    {
+					    return false;
+				    }
+
+				    for (var i = 0; i < xArgs.Length; ++i)
+				    {
+                        if (!EqualSignatureTypes(xArgs[i], yArgs[i]))
+                        {
+                            return false;
+                        }
+				    }
+                }
+                if (x.IsGenericTypeDefinition != y.IsGenericTypeDefinition)
+                {
+                    return false;
+                }
+            }
 			return true;
 		}
 

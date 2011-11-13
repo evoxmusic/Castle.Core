@@ -88,10 +88,23 @@ namespace Castle.DynamicProxy.Internal
 			MethodInfo methodOnTarget = null;
 			if (declaringType.IsInterface && !type.IsInterface)
 			{
-				var mapping = type.GetInterfaceMap(declaringType);
-				var index = Array.IndexOf(mapping.InterfaceMethods, proxiedMethod);
-				Debug.Assert(index != -1);
-				methodOnTarget = mapping.TargetMethods[index];
+                foreach (var interf in type.GetInterfaces())
+                {
+                    if (MethodSignatureComparer.Instance.EqualSignatureTypes(interf, declaringType))
+                    {
+                        var mapping = type.GetInterfaceMap(interf);
+                        for (int index = 0; index < mapping.InterfaceMethods.Length; index++ )
+                        {
+                            var method = mapping.InterfaceMethods[index];
+                            if (MethodSignatureComparer.Instance.Equals(method.GetBaseDefinition(), proxiedMethod))
+                            {
+                                methodOnTarget = mapping.TargetMethods[index];
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
 			}
 			else
 			{
@@ -105,6 +118,21 @@ namespace Castle.DynamicProxy.Internal
 						break;
 					}
 				}
+                if (type.IsInterface)
+                {
+                    foreach (var interf in type.GetInterfaces())
+                    {
+                        methods = MethodFinder.GetAllInstanceMethods(interf, BindingFlags.Public | BindingFlags.NonPublic);
+                        foreach (var method in methods)
+                        {
+                            if (MethodSignatureComparer.Instance.Equals(method.GetBaseDefinition(), proxiedMethod))
+                            {
+                                methodOnTarget = method;
+                                break;
+                            }
+                        }
+                    }
+                }
 			}
 			if (methodOnTarget == null)
 			{
