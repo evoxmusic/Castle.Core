@@ -258,7 +258,7 @@ namespace Castle.DynamicProxy.Generators
 				return callbackMethod;
 			}
 
-			return callbackMethod.MakeGenericMethod(invocation.GetGenericArgumentsFor(callbackMethod));
+            return callbackMethod.GetGenericMethodDefinition().MakeGenericMethod(invocation.GetGenericArgumentsFor(callbackMethod));
 		}
 
 		private AbstractTypeEmitter GetEmitter(ClassEmitter @class, Type[] interfaces, INamingScope namingScope,
